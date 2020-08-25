@@ -15,6 +15,8 @@ namespace ToDoList.Controllers
     {
         private ApplicationDbContext db = new ApplicationDbContext();
 
+        [Authorize]
+
         // GET: ToDoes
         public ActionResult Index()
         {
@@ -28,7 +30,18 @@ namespace ToDoList.Controllers
             ApplicationUser currentUser = db.Users.FirstOrDefault
                 (x => x.Id == currentUserId);
 
-            return db.ToDos.ToList().Where(x => x.User == currentUser);
+            IEnumerable<ToDo> myToDoes = db.ToDos.ToList().Where(x => x.User == currentUser);
+
+            int completeCount = 0;
+            foreach (var toDo in myToDoes)
+            {
+                if (toDo.IsDone)
+                    completeCount++;
+            }
+
+            ViewBag.PercentOfCompleteToDoes = Math.Round(100f * ((float)completeCount / (float)myToDoes.Count()));
+
+            return myToDoes;
         }
 
         public ActionResult BuildToDoTable()
